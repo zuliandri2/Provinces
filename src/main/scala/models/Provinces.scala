@@ -21,5 +21,8 @@ object Provinces {
     def * = (id.?, name, description, updated, deleted, created).mapTo[Province]
   }
 
-  lazy val provincesTable = TableQuery[ProvincesModel]
+  private lazy val provincesTable = TableQuery[ProvincesModel]
+
+  def insert(p: Province) = provincesTable += p
+
 }

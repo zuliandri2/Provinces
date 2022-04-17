@@ -1,23 +1,40 @@
 package zul.province.app
 package services
 
-import models.Provinces.Province
-
+import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.{Configuration, Environment}
 import play.api.inject.Binding
-import slick.dbio.DBIOAction
+
+import scala.util.{Failure, Success}
+import slick.jdbc.H2Profile.api._
+import slick.sql.FixedSqlAction
+import zio.{Task, ZIO, ZLayer}
+import zul.province.app.models.Provinces.ProvincesModel
 
 object ProvincesServices {
 
   trait ProvinciesServices {
-    def create(): Boolean
+    type A
+    def create(a: A): Unit
     def softDelete(): Int
     def delete(): Int
     def update(): Int
   }
 
   object ProvinciesServices extends ProvinciesServices {
-    override def create(): Boolean = ???
+    override type A = FixedSqlAction[Int, NoStream, Nothing]
+
+    val db = ZIO
+
+    override def create(io: A) = {
+      /*val layer = ZLayer.fromEffect(io)*/
+      /*DatabaseService.exec { config =>
+        /*val f = ZIO.fromFuture {
+          config.db.run(io).
+        }*/
+      }*/
+    }
+
     override def delete(): Int = ???
     override def softDelete(): Int = ???
     override def update(): Int = ???

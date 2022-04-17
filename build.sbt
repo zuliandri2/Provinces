@@ -11,6 +11,8 @@ lazy val root = (project in file("."))
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % "test",
       "com.google.inject" % "guice" % "5.1.0",
       "com.typesafe.play" %% "play-jdbc" % "2.8.15",
-      "org.postgresql" % "postgresql" % "42.2.5"
-    )
+      "org.postgresql" % "postgresql" % "42.2.5",
+      "dev.zio" %% "zio" % "1.0.12",
+      "dev.zio" %% "zio-streams" % "1.0.12"
   )
+)
