@@ -1,19 +1,14 @@
 package models
 
-import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfig, HasDatabaseConfigProvider, NamedDatabaseConfigProvider}
-import slick.jdbc.{GetResult, JdbcProfile}
-
+import play.api.db.slick.HasDatabaseConfig
+import slick.basic.DatabaseConfig
+import slick.jdbc.{GetResult, JdbcProfile, PostgresProfile}
 import java.sql.Date
-import slick.basic.{BasicProfile, DatabaseConfig}
-
 import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
-trait ProvinceProfile {
-//  val profile: JdbcProfile
-}
-
-trait ProvinceDatabase extends HasDatabaseConfig[JdbcProfile] with ProvinceProfile {
-  override protected val dbConfig = DatabaseConfig.forConfig("slick.dbs.default")
+trait ProvinceDatabase extends HasDatabaseConfig[PostgresProfile] {
+  override protected val dbConfig = DatabaseConfig.forConfig("slick.dbs.province")
 }
 
 case class Province(id: Option[Int], name: String, description: String, updated: Option[Date] = None, deleted: Option[Date] = None, created: Option[Date] = None)
@@ -38,39 +33,56 @@ trait ProvinceComponent extends ProvinceDatabase {
 }
 
 object ProvinceDAO extends ProvinceComponent {
-
   import profile.api._
   import services.Executor._
 
-  def insert(province: Province) = for {
-      a <- Future { province.copy(created = Some(new Date(System.currentTimeMillis()))) }
-      p <- Future { provinceTableQuery += a }
-      u <- db.run(p)
-    } yield u
+  def insert(province: Province) = (for {
+    a <- Future { province.copy(created = Some(new Date(System.currentTimeMillis()))) }
+    p <- Future { provinceTableQuery += a }
+    u <- db.run(p)
+  } yield u).onComplete {
+    case Success(value) => true
+    case Failure(exception) => exception.printStackTrace()
+  }
 
-  def findById(id: Int) = for {
+  def findById(id: Int) = (for {
     f <- Future { provinceTableQuery.filter(p => p.id === id).result }
     l <- db.run(f)
-  } yield l
+  } yield l).onComplete {
+    case Failure(exception) => exception.printStackTrace()
+    case Success(value) => true
+  }
 
-  def findById(id: List[Int]) = for {
+  def findById(id: List[Int]) = (for {
     f <- Future { provinceTableQuery.filter(p => p.id inSet id ).result }
     l <- db.run(f)
-  } yield l
+  } yield l).onComplete {
+    case Failure(exception) => exception.printStackTrace()
+    case Success(value) => true
+  }
 
-  def delete(id: Int) = for {
+  def delete(id: Int) = (for {
     f <- Future { provinceTableQuery.filter(p => p.id === id).delete }
     r <- db.run(f)
-  } yield r
+  } yield r).onComplete {
+    case Failure(exception) => exception.printStackTrace()
+    case Success(value) => true
+  }
 
-  def delete(id: List[Int]) = for {
+  def delete(id: List[Int]) = (for {
     f <- Future { provinceTableQuery.filter(p => p.id inSet id).delete }
     r <- db.run(f)
-  } yield r
+  } yield r).onComplete {
+    case Failure(exception) => exception.printStackTrace()
+    case Success(value) => true
+  }
 
-  def softDelete(id: List[Int]) = for {
+  def softDelete(id: List[Int]) = (for {
     f <- Future { provinceTableQuery.filter(p => p.id inSet id).map(p => (p.deleted)).update(Some(new Date(System.currentTimeMillis()))) }
     r <- db.run(f)
-  } yield r
+  } yield r).onComplete {
+    case Failure(exception) => exception.printStackTrace()
+    case Success(value) => true
+  }
 
 }
